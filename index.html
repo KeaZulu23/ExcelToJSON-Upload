@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">  
+    <title>Stanley - Crypto
+    </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.min.js">
+    </script>    
+  </head>
+  <body>
+    <h1>Welcome to Stanley's CryptoPlatform.
+    </h1>
+    <!-- Input element to upload an excel file -->
+    <input type="file" id="file_upload" />
+    <button onclick="upload()">Upload
+    </button>	
+    <br>
+    <br>
+    <!-- table to display the excel data -->
+    <table id="display_excel_data" border="1">
+    </table>
+    <script>
+      // Method to upload a valid excel file
+      function upload() {
+        var files = document.getElementById('file_upload').files;
+        if(files.length==0){
+          alert("Please choose any file...");
+          return;
+        }
+        var filename = files[0].name;
+        var extension = filename.substring(filename.lastIndexOf(".")).toUpperCase();
+        if (extension == '.XLS' || extension == '.XLSM') {
+          //Here calling another method to read excel file into json
+          excelFileToJSON(files[0]);
+        }
+        else{
+          alert("Please select a valid excel file.");
+        }
+      }
+      //Method to read excel file and convert it into JSON 
+      function excelFileToJSON(file){
+        try {
+          var reader = new FileReader();
+          reader.readAsBinaryString(file);
+          reader.onload = function(e) {
+            var data = e.target.result;
+            var workbook = XLSX.read(data, {
+              type : 'binary'
+            }
+                                    );
+            var result = {
+            };
+            var firstSheetName = workbook.SheetNames[0];
+            //reading only first sheet data
+            var jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName]);
+            //displaying the json result into HTML table
+            displayJsonToHtmlTable(jsonData);
+          }
+        }
+        catch(e){
+          console.error(e);
+        }
+      }
+      //Method to display the data in HTML Table
+      function displayJsonToHtmlTable(jsonData){
+        var table=document.getElementById("display_excel_data");
+        if(jsonData.length>0){
+          var htmlData='<tr><th>coins</th><th>Bin Price</th><th>ACT Price</th><th>landing</th><th>final output</th><th>to bank</th><th>diff</th><th>diff%</th><th>buy</th><th>sell</th><th>Column</th><th>coin qty</th></tr>';
+          for(var i=0;i<jsonData.length;i++){
+            var row=jsonData[i];
+            htmlData+='<tr><td>'+row["coins"]+'</td><td>'+row["Bin Price"]
+              +'</td><td>'+row["ACT Price"]+'</td><td>'+row["landing"]+'</td><td>'+row["final output"]+'</td><td>'+row["to bank"]+'</td><td>'+row["diff"]+'</td><td>'+row["diff%"]+'</td><td>'+row["buy"]+'</td><td>'+row["sell"]+'</td><td>'+row["Column"]+'</td><td>'+row["coin qty"]+'</td></tr>';
+          }
+          table.innerHTML=htmlData;
+        }
+        else{
+          table.innerHTML='There is no data in Excel';
+        }
+      }
+    </script>
+  </body>
+</html>
